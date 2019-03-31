@@ -70,29 +70,31 @@ class Elavator extends Component{
                 })}
 
                 update={() => {
-                    let hasTasks = this.props.tasks.length>0; 
-                    let floor = this.props.tasks[0];
-                    let {distance, duration, floorDiff} = this.getDistanceBetweenFloors() ;
-                    if(hasTasks && !this.props.isStopping){
-                        let x = 0; 
-                        let currFloor = this.props.currFloor;
-                        // follow the elevator with its route- mark each floor.
-                        var intervalID = setInterval(function () {
-                            if (++x === floorDiff) {
-                                window.clearInterval(intervalID);
-                            }
+                        let hasTasks = this.props.tasks.length>0; 
+                        let floor = this.props.tasks[0];
+                        let {distance, duration, floorDiff} = this.getDistanceBetweenFloors() ;
+                        if(hasTasks && !this.props.isStopping){
+                            let x = 0; 
+                            let currFloor = this.props.currFloor;
+                            let props = this.props;
+                            // follow the elevator with its route- mark each floor.
+                            var intervalID = setInterval(function () {
+                                if (++x === floorDiff) {
+                                    window.clearInterval(intervalID);
+                                }
 
-                            this.props.changeElevatorCurrFloor(this.props.elevatorNum, (x + currFloor));
-                         }, 500);
-                         // set timeout until the elevator arrives to destination floor
-                        setTimeout(()=>{
-                            this.props.onFloorArrival(this.props.elevatorNum, floor);// mark arrival
-                        }, duration)
-                    }
-                    return({
-                        y: [hasTasks ? distance : 0],
-                        timing: { duration/*, ease: easeExpOut*/ },
-                    })
+                                props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor));
+                            }, 500);
+                            // set timeout until the elevator arrives to destination floor
+                            setTimeout(()=>{
+                                this.props.onFloorArrival(this.props.elevatorNum, floor);// mark arrival
+                            }, duration)
+                        }
+                        return({
+                            y: [hasTasks ? distance : 0],
+                            timing: { duration/*, ease: easeExpOut*/ },
+                        })
+                    
                 }}
              >
     

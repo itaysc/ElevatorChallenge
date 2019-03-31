@@ -1,4 +1,4 @@
-export default function(awaitingFloor, elevatorTasks, currFloors, elevatorDirections, numOfElevators){
+export default function(awaitingFloor, elevatorTasks, currFloors, elevatorDirections, numOfElevators, stoppedElevators){
     let selectedElevator = 0;
     let minTimeToWaitInMills = Number.MAX_SAFE_INTEGER;
 
@@ -8,6 +8,7 @@ export default function(awaitingFloor, elevatorTasks, currFloors, elevatorDirect
             let timeToTake = 0;
             elevatorTasks[i].map(floor=>{
                 timeToTake += (Math.abs(floor - currElvFloor) * 500);
+                timeToTake+= 2000; // stops for 2 seconds in each floor
                 currElvFloor = floor;
             });
             if(timeToTake < minTimeToWaitInMills){
