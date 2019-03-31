@@ -1,0 +1,45 @@
+﻿.blackline {
+height: 7px;
+background-color: #000000;
+}
+.elvPng{
+    width: 90px;
+    float: left;
+}
+.floorStyle{
+    height: 103px;
+    max-width: 300px;
+    border: 7px solid black;
+    width: 300px;
+    display: inline-flex;
+    float: left;
+    flex:1;
+}
+.settings{
+    direction: rtl;
+    clear:both;
+}
+.mainContainer{
+    margin-top: 30px;
+}
+
+.floorsContainer{
+    display: flex;
+    flex-direction: column;
+}
+.floorAwaiting{
+    color: green !important;
+}
+.waitingTime{
+    font-size: 30px;
+    color: mediumblue;
+    font-weight: 900;
+}
+.floorContainer{
+    display: flex;
+    flex-direction: row;
+    margin-right: 50px;
+}
+.translationDiv{
+    will-change: transform, box-shadow, z-index;
+}
