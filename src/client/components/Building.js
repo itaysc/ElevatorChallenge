@@ -12,7 +12,7 @@ const Building = (props)=>{
         let elevators = [];
         for(let i = 0; i < props.numOfElevators; i++){
             let currFloor =( props.currFloors.length > 0 && props.currFloors[i])? props.currFloors[i]: 0;
-            let isStopping = props.stoppedElevators.includes(i);
+            let waitingOnFloor = props.stoppedElevators.includes(i);
             elevators.push(
                     <Elavator key={`elevator${i}`} 
                         elevatorNum={i}
@@ -20,7 +20,7 @@ const Building = (props)=>{
                         tasks={props.elevatorTasks[i]}
                         onFloorArrival={props.onFloorArrival}
                         changeElevatorCurrFloor={props.changeElevatorCurrFloor}
-                        isStopping={isStopping}/>
+                        waitingOnFloor={waitingOnFloor}/>
                 );
         }
 

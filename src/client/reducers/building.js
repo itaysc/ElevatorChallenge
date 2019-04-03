@@ -47,7 +47,6 @@ export default function(state = initialState, action) {
         currFloors[action.payload.elevatorNum] = action.payload.floorNum;
         let stoppedElevators = [...state.stoppedElevators];
         stoppedElevators.push(action.payload.elevatorNum);
-        //let currElvRemainingFloors = [...remainingTasks[action.payload.elevatorNum]];
         let currElvRemainingFloors = remainingTasks[action.payload.elevatorNum] || [];
         if(currElvRemainingFloors.includes(action.payload.floorNum)){
             let audio = document.getElementById(`dingSound${action.payload.elevatorNum}`);
@@ -71,13 +70,6 @@ export default function(state = initialState, action) {
         let reservations = [...state.awaitingReservations];
         reservations.push(action.payload.floorNum);
         tasks[action.payload.elevatorNum].push(action.payload.floorNum);
-        // tasks.sort((a,b)=>{
-        //     if(Math.abs(a - action.payload.currFloor) < Math.abs(b - action.payload.currFloor)){
-        //         return 1
-        //     }else{
-        //         return -1;
-        //     }
-        // });
         return {...state, elevatorTasks: tasks, awaitingReservations: reservations, waitingTimes};
         
 

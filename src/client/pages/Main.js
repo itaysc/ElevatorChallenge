@@ -26,11 +26,7 @@ class Home extends Component{
       stoppedElevators: []
     }
   }
-  orderElevator = (floorNum) => {
-    let awaitingReservations = [...this.state.awaitingReservations];
-    awaitingReservations.push(floorNum);
-    this.setState(floorNum);
-  };
+
   
   markElevatorArrival = (elevatorNum, floorNum)=>{
       setTimeout(()=>{ // setTimeout to free the elevator
@@ -111,18 +107,22 @@ class Home extends Component{
                                   elevatorDirections, 
                                   elevators,
                                   stoppedElevators);
+
+      this.addElevatorTask(elevator, floorNum, timeToWait);
       this.setFloorWaitingTime(floorNum, timeToWait);
       let remainingTime = timeToWait;
+      
       let interval = setInterval(()=>{
         remainingTime-=(500/1000);
         if(remainingTime > 0){
           this.setFloorWaitingTime(floorNum, remainingTime);
         }else{
           clearInterval(interval);
+          this.setFloorWaitingTime(floorNum, 0);
         }
         
       }, 500);
-      this.addElevatorTask(elevator, floorNum, timeToWait);
+      
     }
 
   }
