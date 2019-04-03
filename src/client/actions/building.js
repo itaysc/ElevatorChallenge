@@ -5,9 +5,17 @@ export const orderElevator = (floorNum) => {
 };
 
 export const markElevatorArrival = (elevatorNum, floorNum, callback=null) => async(dispatch)=>{
-    setTimeout(()=>{ // setTimeout to free the elevator
-      dispatch({type: types.UNLOCK_ELEVATOR, payload: elevatorNum})
-    }, 2000)
+    let remainingTime = 2;
+    let id = setInterval(changeRemainingTime, 500);
+    function changeRemainingTime(){
+      remainingTime = remainingTime - 0.5;
+      if(remainingTime === 0){
+        clearInterval(id);
+        dispatch({type: types.UNLOCK_ELEVATOR, payload: {elevatorNum, floorNum}})
+      }else{
+        dispatch({type: types.REDUCE_ALL_FLOORS_WAITING_TIME, payload: floorNum});
+      }
+    }
     return dispatch({type: types.ARRIVED_TO_FLOOR, payload: {elevatorNum, floorNum}});
 };
 
@@ -27,7 +35,8 @@ export const removeElevatorTask = (elevatorNum, floorNum) => {
   return {type: types.REMOVE_ELEVATOR_TASK, payload: {elevatorNum, floorNum}};
 };
 
-export const changeElevatorCurrFloor = (elevatorNum, floorNum) => {
-  return {type: types.CHANGE_ELEVATOR_CURR_FLOOR, payload: {elevatorNum, floorNum}};
+export const changeElevatorCurrFloor = (elevatorNum, floorNum, initialFloorNum) => async(dispatch)=> {
+  dispatch({type: types.REDUCE_ALL_FLOORS_WAITING_TIME, payload: initialFloorNum});
+  return dispatch({type: types.CHANGE_ELEVATOR_CURR_FLOOR, payload: {elevatorNum, floorNum}});
 };
 

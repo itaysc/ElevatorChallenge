@@ -122,7 +122,7 @@ class Elavator extends Component{
                                     //props.reduceFloorWaitingTime(floor);
                                 }else{
                                     props.reduceFloorWaitingTime(floor);
-                                    props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor));
+                                    props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor), floor);
                                 }
                             }
                         }

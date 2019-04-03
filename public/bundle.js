@@ -5759,7 +5759,8 @@ exports.default = {
     REMOVE_ELEVATOR_TASK: 'REMOVE_ELEVATOR_TASK',
     CHANGE_ELEVATOR_CURR_FLOOR: 'CHANGE_ELEVATOR_CURR_FLOOR',
     UNLOCK_ELEVATOR: 'UNLOCK_ELEVATOR',
-    REDUCE_FLOOR_WAITING_TIME: 'REDUCE_FLOOR_WAITING_TIME'
+    REDUCE_FLOOR_WAITING_TIME: 'REDUCE_FLOOR_WAITING_TIME',
+    REDUCE_ALL_FLOORS_WAITING_TIME: 'REDUCE_ALL_FLOORS_WAITING_TIME'
 };
 
 /***/ }),
@@ -5902,7 +5903,7 @@ var Elavator = function (_Component) {
                                         //props.reduceFloorWaitingTime(floor);
                                     } else {
                                         props.reduceFloorWaitingTime(floor);
-                                        props.changeElevatorCurrFloor(props.elevatorNum, x + currFloor);
+                                        props.changeElevatorCurrFloor(props.elevatorNum, x + currFloor, floor);
                                     }
                                 };
 
@@ -62882,9 +62883,18 @@ exports.default = function () {
 
         case _types2.default.UNLOCK_ELEVATOR:
             var lockedElevators = state.stoppedElevators.filter(function (e) {
-                return e != action.payload;
+                return e != action.payload.elevatorNum;
             });
-            return _extends({}, state, { stoppedElevators: lockedElevators });
+            var remainingTasks2 = [].concat(_toConsumableArray(state.elevatorTasks));
+            var currElvRemainingFloors2 = remainingTasks2[action.payload.elevatorNum] || [];
+            currElvRemainingFloors2 = currElvRemainingFloors2.filter(function (entry) {
+                return entry.floor != action.payload.floorNum;
+            });
+            if (currElvRemainingFloors2.length > 0) {
+                currElvRemainingFloors2[0].started = true;
+            }
+            remainingTasks2[action.payload.elevatorNum] = currElvRemainingFloors2;
+            return _extends({}, state, { stoppedElevators: lockedElevators, elevatorTasks: remainingTasks2 });
 
         case _types2.default.ARRIVED_TO_FLOOR:
             var remainingFloors = state.awaitingReservations.filter(function (f) {
@@ -62905,14 +62915,12 @@ exports.default = function () {
                 audio.load();
                 audio.play();
             }
-            currElvRemainingFloors = currElvRemainingFloors.filter(function (entry) {
-                return entry.floor != action.payload.floorNum;
-            });
-            if (currElvRemainingFloors.length > 0) {
-                currElvRemainingFloors[0].started = true;
-            }
-            remainingTasks[action.payload.elevatorNum] = currElvRemainingFloors;
-            return _extends({}, state, { elevatorTasks: remainingTasks,
+            // currElvRemainingFloors = currElvRemainingFloors.filter(entry=> entry.floor!=action.payload.floorNum);
+            // if(currElvRemainingFloors.length > 0){
+            //     currElvRemainingFloors[0].started = true;
+            // }
+            // remainingTasks[action.payload.elevatorNum] = currElvRemainingFloors;
+            return _extends({}, state, {
                 currFloors: currFloors, awaitingReservations: remainingFloors,
                 waitingTimes: waitingTimes2,
                 stoppedElevators: stoppedElevators });
@@ -62939,6 +62947,25 @@ exports.default = function () {
             var wt = [].concat(_toConsumableArray(state.waitingTimes));
             wt[action.payload.floorNum] = action.payload.timeToWait;
             return _extends({}, state, { waitingTimes: wt });
+
+        case _types2.default.REDUCE_ALL_FLOORS_WAITING_TIME:
+            var remainingTasks3 = [];
+            // [[{started, floorNum}, {started, floorNum}], [{started, floorNum}, {started, floorNum}]]
+            state.elevatorTasks.map(function (t, elevatorNum) {
+                if (t && t.length > 0) {
+                    t.map(function (job) {
+                        if (job.floor != action.payload) {
+                            remainingTasks3.push(job.floor);
+                        }
+                    });
+                }
+            });
+            var waitT = [].concat(_toConsumableArray(state.waitingTimes));
+            remainingTasks3.map(function (index) {
+                waitT[index] = waitT[index] - 0.5;
+            });
+            return _extends({}, state, { waitingTimes: waitT });
+
         default:
             return state;
     }
@@ -63304,17 +63331,26 @@ var markElevatorArrival = exports.markElevatorArrival = function markElevatorArr
   var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
   return function () {
     var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch) {
+      var remainingTime, id, changeRemainingTime;
       return regeneratorRuntime.wrap(function _callee$(_context) {
         while (1) {
           switch (_context.prev = _context.next) {
             case 0:
-              setTimeout(function () {
-                // setTimeout to free the elevator
-                dispatch({ type: _types2.default.UNLOCK_ELEVATOR, payload: elevatorNum });
-              }, 2000);
+              changeRemainingTime = function changeRemainingTime() {
+                remainingTime = remainingTime - 0.5;
+                if (remainingTime === 0) {
+                  clearInterval(id);
+                  dispatch({ type: _types2.default.UNLOCK_ELEVATOR, payload: { elevatorNum: elevatorNum, floorNum: floorNum } });
+                } else {
+                  dispatch({ type: _types2.default.REDUCE_ALL_FLOORS_WAITING_TIME, payload: floorNum });
+                }
+              };
+
+              remainingTime = 2;
+              id = setInterval(changeRemainingTime, 500);
               return _context.abrupt('return', dispatch({ type: _types2.default.ARRIVED_TO_FLOOR, payload: { elevatorNum: elevatorNum, floorNum: floorNum } }));
 
-            case 2:
+            case 4:
             case 'end':
               return _context.stop();
           }
@@ -63344,8 +63380,28 @@ var removeElevatorTask = exports.removeElevatorTask = function removeElevatorTas
   return { type: _types2.default.REMOVE_ELEVATOR_TASK, payload: { elevatorNum: elevatorNum, floorNum: floorNum } };
 };
 
-var changeElevatorCurrFloor = exports.changeElevatorCurrFloor = function changeElevatorCurrFloor(elevatorNum, floorNum) {
-  return { type: _types2.default.CHANGE_ELEVATOR_CURR_FLOOR, payload: { elevatorNum: elevatorNum, floorNum: floorNum } };
+var changeElevatorCurrFloor = exports.changeElevatorCurrFloor = function changeElevatorCurrFloor(elevatorNum, floorNum, initialFloorNum) {
+  return function () {
+    var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(dispatch) {
+      return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        while (1) {
+          switch (_context2.prev = _context2.next) {
+            case 0:
+              dispatch({ type: _types2.default.REDUCE_ALL_FLOORS_WAITING_TIME, payload: initialFloorNum });
+              return _context2.abrupt('return', dispatch({ type: _types2.default.CHANGE_ELEVATOR_CURR_FLOOR, payload: { elevatorNum: elevatorNum, floorNum: floorNum } }));
+
+            case 2:
+            case 'end':
+              return _context2.stop();
+          }
+        }
+      }, _callee2, undefined);
+    }));
+
+    return function (_x3) {
+      return _ref2.apply(this, arguments);
+    };
+  }();
 };
 
 /***/ })
