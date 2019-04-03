@@ -5758,7 +5758,8 @@ exports.default = {
     SET_FLOOR_WAITING_TIME: 'SET_FLOOR_WAITING_TIME',
     REMOVE_ELEVATOR_TASK: 'REMOVE_ELEVATOR_TASK',
     CHANGE_ELEVATOR_CURR_FLOOR: 'CHANGE_ELEVATOR_CURR_FLOOR',
-    UNLOCK_ELEVATOR: 'UNLOCK_ELEVATOR'
+    UNLOCK_ELEVATOR: 'UNLOCK_ELEVATOR',
+    REDUCE_FLOOR_WAITING_TIME: 'REDUCE_FLOOR_WAITING_TIME'
 };
 
 /***/ }),
@@ -5810,6 +5811,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var BRICK_HEIGHT = 110;
 var BRICK_BORDER = 7;
+var needToSetInterval = true;
 
 var Elavator = function (_Component) {
     _inherits(Elavator, _Component);
@@ -5841,6 +5843,14 @@ var Elavator = function (_Component) {
 
     _createClass(Elavator, [{
         key: 'componentWillReceiveProps',
+
+        //  shouldComponentUpdate(nextProps, nextState){
+        //     if(nextProps.tasks != this.props.tasks && nextProps.tasks.length > 0){
+        //         needToSetInterval = true;
+        //     }
+
+        //     return nextProps !== this.props || nextState !== this.state;
+        //  }
         value: function componentWillReceiveProps(nextProps) {
             if (nextProps.tasks.length > 0) {
                 this.setState({ isMoving: true });
@@ -5873,7 +5883,6 @@ var Elavator = function (_Component) {
                             var y = _ref.y;
 
                             var hasTasks = _this2.props.tasks.length > 0;
-                            var floor = _this2.props.tasks[0];
                             var elem = document.getElementById('elevator' + _this2.props.elevatorNum);
 
                             var _getDistanceBetweenFl = _this2.getDistanceBetweenFloors(),
@@ -5882,19 +5891,30 @@ var Elavator = function (_Component) {
                                 floorDiff = _getDistanceBetweenFl.floorDiff,
                                 direction = _getDistanceBetweenFl.direction;
 
-                            if (hasTasks && !_this2.props.waitingOnFloor) {
+                            if (hasTasks && !_this2.props.waitingOnFloor && _this2.props.tasks[0].started) {
+                                var _increamentFloor = function _increamentFloor() {
+                                    x++;
+                                    if (x === floorDiff) {
+                                        x = 0;
+                                        needToSetInterval = true;
+                                        clearInterval(intervalID);
+                                        props.onFloorArrival(props.elevatorNum, floor); // mark arrival
+                                        //props.reduceFloorWaitingTime(floor);
+                                    } else {
+                                        props.reduceFloorWaitingTime(floor);
+                                        props.changeElevatorCurrFloor(props.elevatorNum, x + currFloor);
+                                    }
+                                };
+
                                 var x = 0;
                                 var currFloor = _this2.props.currFloor;
                                 var props = _this2.props;
                                 // follow the elevator with its route- mark each floor.
-                                var intervalID = setInterval(function () {
-                                    if (++x === floorDiff) {
-                                        props.onFloorArrival(props.elevatorNum, floor); // mark arrival
-                                        window.clearInterval(intervalID);
-                                    }
-
-                                    props.changeElevatorCurrFloor(props.elevatorNum, x + currFloor);
-                                }, 500);
+                                var floor = _this2.props.tasks[0].floor;
+                                if (needToSetInterval) {
+                                    needToSetInterval = false;
+                                    var intervalID = setInterval(_increamentFloor, 500);
+                                }
                             }
                             //let defaultY = direction * this.props.currFloor * (BRICK_HEIGHT+BRICK_BORDER);
                             return {
@@ -5944,7 +5964,8 @@ Elavator.propTypes = {
     elevatorNum: _propTypes2.default.number,
     removeElevatorTask: _propTypes2.default.func,
     changeElevatorCurrFloor: _propTypes2.default.func,
-    waitingOnFloor: _propTypes2.default.bool
+    waitingOnFloor: _propTypes2.default.bool,
+    reduceFloorWaitingTime: _propTypes2.default.func
 };
 Elavator.defaultProps = {
     tasks: [],
@@ -5962,8 +5983,8 @@ var _initialiseProps = function _initialiseProps() {
             props = _this3.props;
         }
         if (props.tasks && props.tasks.length > 0) {
-            var direction = props.currFloor > props.tasks[0] ? 1 : -1;
-            var floorDiff = Math.abs(props.currFloor - props.tasks[0]);
+            var direction = props.currFloor > props.tasks[0].floor ? 1 : -1;
+            var floorDiff = Math.abs(props.currFloor - props.tasks[0].floor);
             var heightToTravel = floorDiff * direction * BRICK_HEIGHT + floorDiff * BRICK_BORDER;
             return {
                 distance: heightToTravel,
@@ -52161,6 +52182,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(0);
@@ -52172,6 +52195,10 @@ var _reactRedux = __webpack_require__(226);
 var _redux = __webpack_require__(96);
 
 var _settings = __webpack_require__(608);
+
+var _building = __webpack_require__(745);
+
+var buildingActions = _interopRequireWildcard(_building);
 
 var _Elevator = __webpack_require__(144);
 
@@ -52197,9 +52224,9 @@ var _findElevator2 = __webpack_require__(733);
 
 var _findElevator3 = _interopRequireDefault(_findElevator2);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -52215,92 +52242,14 @@ var Home = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (Home.__proto__ || Object.getPrototypeOf(Home)).call(this, props));
 
-    _this.markElevatorArrival = function (elevatorNum, floorNum) {
-      setTimeout(function () {
-        // setTimeout to free the elevator
-        var blockedElevators = _this.state.stoppedElevators.filter(function (e) {
-          return e != elevatorNum;
-        });
-        _this.setState({ stoppedElevators: blockedElevators });
-      }, 2000);
-      var remainingFloors = _this.state.awaitingReservations.filter(function (f) {
-        return f != floorNum;
-      });
-      var remainingTasks = [].concat(_toConsumableArray(_this.state.elevatorTasks));
-      var waitingTimes2 = [].concat(_toConsumableArray(_this.state.waitingTimes));
-      waitingTimes2[floorNum] = 0;
-      var currFloors = [].concat(_toConsumableArray(_this.state.currFloors));
-      currFloors[elevatorNum] = floorNum;
-      var stoppedElevators = [].concat(_toConsumableArray(_this.state.stoppedElevators));
-      stoppedElevators.push(elevatorNum);
-      var currElvRemainingFloors = remainingTasks[elevatorNum] || [];
-      if (currElvRemainingFloors.includes(floorNum)) {
-        var audio = document.getElementById('dingSound' + elevatorNum);
-        audio.load();
-        audio.play();
-      }
-      currElvRemainingFloors = currElvRemainingFloors.filter(function (floor) {
-        return floor != floorNum;
-      });
-      remainingTasks[elevatorNum] = currElvRemainingFloors;
-      _this.setState({
-        elevatorTasks: remainingTasks,
-        currFloors: currFloors,
-        awaitingReservations: remainingFloors,
-        waitingTimes: waitingTimes2,
-        stoppedElevators: stoppedElevators
-      });
-    };
-
-    _this.addElevatorTask = function (elevatorNum, floorNum, timeToWait) {
-      var tasks = [].concat(_toConsumableArray(_this.state.elevatorTasks));
-      var waitingTimes = [].concat(_toConsumableArray(_this.state.waitingTimes));
-      waitingTimes[floorNum] = timeToWait;
-      if (!Array.isArray(tasks[elevatorNum])) {
-        tasks[elevatorNum] = [];
-      }
-      var reservations = [].concat(_toConsumableArray(_this.state.awaitingReservations));
-      reservations.push(floorNum);
-      tasks[elevatorNum].push(floorNum);
-      _this.setState({
-        elevatorTasks: tasks,
-        awaitingReservations: reservations,
-        waitingTimes: waitingTimes
-      });
-    };
-
-    _this.setFloorWaitingTime = function (floorNum, timeToWait) {
-      var wt = [].concat(_toConsumableArray(_this.state.waitingTimes));
-      wt[floorNum] = timeToWait;
-      _this.setState({ waitingTimes: wt });
-    };
-
-    _this.removeElevatorTask = function (elevatorNum, floorNum) {
-      var etasks = [].concat(_toConsumableArray(_this.state.elevatorTasks));
-      var etask = etasks[elevatorNum] || [];
-      etask = etask.filter(function (floor) {
-        return floor != floorNum;
-      });
-      etasks[elevatorNum] = etask;
-      _this.setState({
-        elevatorTasks: etasks
-      });
-    };
-
-    _this.changeElevatorCurrFloor = function (elevatorNum, floorNum) {
-      var elvCurrFloors = [].concat(_toConsumableArray(_this.state.currFloors));
-      elvCurrFloors[elevatorNum] = floorNum;
-      _this.setState({ currFloor: elvCurrFloors });
-    };
-
     _this.addTask = function (floorNum) {
       var elevators = _this.props.settings.elevators;
-      var _this$state = _this.state,
-          elevatorTasks = _this$state.elevatorTasks,
-          currFloors = _this$state.currFloors,
-          awaitingReservations = _this$state.awaitingReservations,
-          elevatorDirections = _this$state.elevatorDirections,
-          stoppedElevators = _this$state.stoppedElevators;
+      var _this$props$data = _this.props.data,
+          elevatorTasks = _this$props$data.elevatorTasks,
+          currFloors = _this$props$data.currFloors,
+          awaitingReservations = _this$props$data.awaitingReservations,
+          elevatorDirections = _this$props$data.elevatorDirections,
+          stoppedElevators = _this$props$data.stoppedElevators;
 
       if (!awaitingReservations.includes(floorNum)) {
         // add new floor reservation only if it doesn`t exist.
@@ -52308,19 +52257,20 @@ var Home = function (_Component) {
             elevator = _findElevator.elevator,
             timeToWait = _findElevator.timeToWait;
 
-        _this.addElevatorTask(elevator, floorNum, timeToWait);
-        _this.setFloorWaitingTime(floorNum, timeToWait);
+        _this.props.addElevatorTask(elevator, floorNum, timeToWait);
+        _this.props.setFloorWaitingTime(floorNum, timeToWait);
         var remainingTime = timeToWait;
 
-        var interval = setInterval(function () {
-          remainingTime -= 500 / 1000;
-          if (remainingTime > 0) {
-            _this.setFloorWaitingTime(floorNum, remainingTime);
-          } else {
-            clearInterval(interval);
-            _this.setFloorWaitingTime(floorNum, 0);
-          }
-        }, 500);
+        // let interval = setInterval(()=>{
+        //   remainingTime-=(500/1000);
+        //   if(remainingTime > 0){
+        //     this.props.setFloorWaitingTime(floorNum, remainingTime);
+        //   }else{
+        //     clearInterval(interval);
+        //     this.props.setFloorWaitingTime(floorNum, 0);
+        //   }
+
+        // }, 500);
       }
     };
 
@@ -52329,7 +52279,7 @@ var Home = function (_Component) {
     };
 
     _this.state = {
-      awaitingReservations: [],
+
       //associative array based on elevator numbers which describes the remaining floors for each elevators
       elevatorTasks: [],
       //associative array based on elevator numbers which describes the current floor of each elevator
@@ -52350,7 +52300,7 @@ var Home = function (_Component) {
       var _props$settings = this.props.settings,
           floors = _props$settings.floors,
           elevators = _props$settings.elevators;
-
+      var data = this.props.data;
 
       return _react2.default.createElement(
         'div',
@@ -52359,13 +52309,14 @@ var Home = function (_Component) {
         _react2.default.createElement(_Building2.default, { numOfFloors: floors,
           numOfElevators: elevators,
           addReservation: this.addTask,
-          awaitingReservations: this.state.awaitingReservations,
-          currFloors: this.state.currFloors,
-          elevatorTasks: this.state.elevatorTasks,
-          onFloorArrival: this.markElevatorArrival,
-          waitingTimes: this.state.waitingTimes,
-          changeElevatorCurrFloor: this.changeElevatorCurrFloor,
-          stoppedElevators: this.state.stoppedElevators })
+          awaitingReservations: data.awaitingReservations,
+          currFloors: data.currFloors,
+          elevatorTasks: data.elevatorTasks,
+          onFloorArrival: this.props.markElevatorArrival,
+          waitingTimes: data.waitingTimes,
+          changeElevatorCurrFloor: this.props.changeElevatorCurrFloor,
+          stoppedElevators: data.stoppedElevators,
+          reduceFloorWaitingTime: this.props.reduceFloorWaitingTime })
       );
     }
   }]);
@@ -52376,14 +52327,15 @@ var Home = function (_Component) {
 ;
 
 var mapDispatchToProps = function mapDispatchToProps(dispatch) {
-  return (0, _redux.bindActionCreators)({
+  return (0, _redux.bindActionCreators)(_extends({
     changeSettings: _settings.changeSettings
-  }, dispatch);
+  }, buildingActions), dispatch);
 };
 
 function mapStateToProps(state, ownProps) {
   return {
-    settings: state.settings
+    settings: state.settings,
+    data: state.elevatorsManagement
   };
 }
 
@@ -53577,7 +53529,8 @@ var Building = function Building(props) {
                 tasks: props.elevatorTasks[i],
                 onFloorArrival: props.onFloorArrival,
                 changeElevatorCurrFloor: props.changeElevatorCurrFloor,
-                waitingOnFloor: waitingOnFloor }));
+                waitingOnFloor: waitingOnFloor,
+                reduceFloorWaitingTime: props.reduceFloorWaitingTime }));
         }
 
         return elevators;
@@ -53635,7 +53588,8 @@ Building.propTypes = {
     onFloorArrival: _propTypes2.default.func,
     waitingTimes: _propTypes2.default.array,
     changeElevatorCurrFloor: _propTypes2.default.func,
-    stoppedElevators: _propTypes2.default.arrayOf(_propTypes2.default.number)
+    stoppedElevators: _propTypes2.default.arrayOf(_propTypes2.default.number),
+    reduceFloorWaitingTime: _propTypes2.default.func
 };
 
 exports.default = Building;
@@ -62789,10 +62743,10 @@ exports.default = function (awaitingFloor, elevatorTasks, currFloors, elevatorDi
         var currElvFloor = currFloors[i] || 0;
         if (elevatorTasks[i] && elevatorTasks[i].length > 0) {
             var timeToTake = 0;
-            elevatorTasks[i].map(function (floor) {
-                timeToTake += Math.abs(floor - currElvFloor) * 500;
+            elevatorTasks[i].map(function (entry) {
+                timeToTake += Math.abs(entry.floor - currElvFloor) * 500;
                 timeToTake += 2000; // stops for 2 seconds in each floor
-                currElvFloor = floor;
+                currElvFloor = entry.floor;
             });
             if (timeToTake < minTimeToWaitInMills) {
                 selectedElevator = i;
@@ -62915,8 +62869,8 @@ exports.default = function () {
         case _types2.default.REMOVE_ELEVATOR_TASK:
             var etasks = [].concat(_toConsumableArray(state.elevatorTasks));
             var etask = etasks[action.payload.elevatorNum] || [];
-            etask = etask.filter(function (floor) {
-                return floor != action.payload.floorNum;
+            etask = etask.filter(function (entry) {
+                return entry.floor != action.payload.floorNum;
             });
             etasks[action.payload.elevatorNum] = etask;
             return _extends({}, state, { elevatorTasks: etasks });
@@ -62944,14 +62898,19 @@ exports.default = function () {
             var stoppedElevators = [].concat(_toConsumableArray(state.stoppedElevators));
             stoppedElevators.push(action.payload.elevatorNum);
             var currElvRemainingFloors = remainingTasks[action.payload.elevatorNum] || [];
-            if (currElvRemainingFloors.includes(action.payload.floorNum)) {
+            if (currElvRemainingFloors.filter(function (r) {
+                return r.started && r.floor == action.payload.floorNum;
+            }).length > 0) {
                 var audio = document.getElementById('dingSound' + action.payload.elevatorNum);
                 audio.load();
                 audio.play();
             }
-            currElvRemainingFloors = currElvRemainingFloors.filter(function (floor) {
-                return floor != action.payload.floorNum;
+            currElvRemainingFloors = currElvRemainingFloors.filter(function (entry) {
+                return entry.floor != action.payload.floorNum;
             });
+            if (currElvRemainingFloors.length > 0) {
+                currElvRemainingFloors[0].started = true;
+            }
             remainingTasks[action.payload.elevatorNum] = currElvRemainingFloors;
             return _extends({}, state, { elevatorTasks: remainingTasks,
                 currFloors: currFloors, awaitingReservations: remainingFloors,
@@ -62959,6 +62918,7 @@ exports.default = function () {
                 stoppedElevators: stoppedElevators });
 
         case _types2.default.ADD_ELEVATOR_TASK:
+            var isStarted = state.elevatorTasks.length === 0 || !state.elevatorTasks[action.payload.elevatorNum] || state.elevatorTasks[action.payload.elevatorNum] && state.elevatorTasks[action.payload.elevatorNum].length === 0;
             var tasks = [].concat(_toConsumableArray(state.elevatorTasks));
             var waitingTimes = [].concat(_toConsumableArray(state.waitingTimes));
             waitingTimes[action.payload.floorNum] = action.payload.timeToWait;
@@ -62967,8 +62927,13 @@ exports.default = function () {
             }
             var reservations = [].concat(_toConsumableArray(state.awaitingReservations));
             reservations.push(action.payload.floorNum);
-            tasks[action.payload.elevatorNum].push(action.payload.floorNum);
+            tasks[action.payload.elevatorNum].push({ started: isStarted, floor: action.payload.floorNum });
             return _extends({}, state, { elevatorTasks: tasks, awaitingReservations: reservations, waitingTimes: waitingTimes });
+
+        case _types2.default.REDUCE_FLOOR_WAITING_TIME:
+            var wtimes = [].concat(_toConsumableArray(state.waitingTimes));
+            wtimes[action.payload] = wtimes[action.payload] - 0.5;
+            return _extends({}, state, { waitingTimes: wtimes });
 
         case _types2.default.SET_FLOOR_WAITING_TIME:
             var wt = [].concat(_toConsumableArray(state.waitingTimes));
@@ -63310,6 +63275,78 @@ exports.default = function (element, durationMills, startY, endY) {
 
 var BRICK_HEIGHT = 110;
 var BRICK_BORDER = 7;
+
+/***/ }),
+/* 745 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.changeElevatorCurrFloor = exports.removeElevatorTask = exports.reduceFloorWaitingTime = exports.setFloorWaitingTime = exports.addElevatorTask = exports.markElevatorArrival = exports.orderElevator = undefined;
+
+var _types = __webpack_require__(143);
+
+var _types2 = _interopRequireDefault(_types);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
+var orderElevator = exports.orderElevator = function orderElevator(floorNum) {
+  return { type: _types2.default.ORDER_ELEVATOR, payload: floorNum };
+};
+
+var markElevatorArrival = exports.markElevatorArrival = function markElevatorArrival(elevatorNum, floorNum) {
+  var callback = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+  return function () {
+    var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(dispatch) {
+      return regeneratorRuntime.wrap(function _callee$(_context) {
+        while (1) {
+          switch (_context.prev = _context.next) {
+            case 0:
+              setTimeout(function () {
+                // setTimeout to free the elevator
+                dispatch({ type: _types2.default.UNLOCK_ELEVATOR, payload: elevatorNum });
+              }, 2000);
+              return _context.abrupt('return', dispatch({ type: _types2.default.ARRIVED_TO_FLOOR, payload: { elevatorNum: elevatorNum, floorNum: floorNum } }));
+
+            case 2:
+            case 'end':
+              return _context.stop();
+          }
+        }
+      }, _callee, undefined);
+    }));
+
+    return function (_x2) {
+      return _ref.apply(this, arguments);
+    };
+  }();
+};
+
+var addElevatorTask = exports.addElevatorTask = function addElevatorTask(elevatorNum, floorNum, timeToWait) {
+  return { type: _types2.default.ADD_ELEVATOR_TASK, payload: { elevatorNum: elevatorNum, floorNum: floorNum, timeToWait: timeToWait } };
+};
+
+var setFloorWaitingTime = exports.setFloorWaitingTime = function setFloorWaitingTime(floorNum, timeToWait) {
+  return { type: _types2.default.SET_FLOOR_WAITING_TIME, payload: { floorNum: floorNum, timeToWait: timeToWait } };
+};
+
+var reduceFloorWaitingTime = exports.reduceFloorWaitingTime = function reduceFloorWaitingTime(floorNum) {
+  return { type: _types2.default.REDUCE_FLOOR_WAITING_TIME, payload: floorNum };
+};
+
+var removeElevatorTask = exports.removeElevatorTask = function removeElevatorTask(elevatorNum, floorNum) {
+  return { type: _types2.default.REMOVE_ELEVATOR_TASK, payload: { elevatorNum: elevatorNum, floorNum: floorNum } };
+};
+
+var changeElevatorCurrFloor = exports.changeElevatorCurrFloor = function changeElevatorCurrFloor(elevatorNum, floorNum) {
+  return { type: _types2.default.CHANGE_ELEVATOR_CURR_FLOOR, payload: { elevatorNum: elevatorNum, floorNum: floorNum } };
+};
 
 /***/ })
 /******/ ]);

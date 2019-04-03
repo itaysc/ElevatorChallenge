@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {changeSettings} from '../actions/settings';
+import * as buildingActions from '../actions/building';
 import Elavator from '../components/Elevator';
 import Building from '../components/Building';
 import Settings from '../components/Settings';
@@ -13,7 +14,7 @@ class Home extends Component{
   constructor(props){
     super(props);
     this.state = {
-      awaitingReservations: [],
+
       //associative array based on elevator numbers which describes the remaining floors for each elevators
       elevatorTasks: [],
       //associative array based on elevator numbers which describes the current floor of each elevator
@@ -28,78 +29,10 @@ class Home extends Component{
   }
 
   
-  markElevatorArrival = (elevatorNum, floorNum)=>{
-      setTimeout(()=>{ // setTimeout to free the elevator
-        let blockedElevators = this.state.stoppedElevators.filter(e=>e!=elevatorNum);
-        this.setState({stoppedElevators: blockedElevators});
-      }, 2000)
-      let remainingFloors = this.state.awaitingReservations.filter(f=>f!=floorNum);
-      let remainingTasks = [...this.state.elevatorTasks];
-      let waitingTimes2 = [...this.state.waitingTimes];
-      waitingTimes2[floorNum] = 0;
-      let currFloors = [...this.state.currFloors];
-      currFloors[elevatorNum] = floorNum;
-      let stoppedElevators = [...this.state.stoppedElevators];
-      stoppedElevators.push(elevatorNum);
-      let currElvRemainingFloors = remainingTasks[elevatorNum] || [];
-      if(currElvRemainingFloors.includes(floorNum)){
-          let audio = document.getElementById(`dingSound${elevatorNum}`);
-          audio.load();
-          audio.play();
-      }
-      currElvRemainingFloors = currElvRemainingFloors.filter(floor=> floor!=floorNum);
-      remainingTasks[elevatorNum] = currElvRemainingFloors;
-      this.setState({
-        elevatorTasks: remainingTasks, 
-        currFloors, 
-        awaitingReservations:remainingFloors,
-        waitingTimes: waitingTimes2,
-        stoppedElevators
-      });
-  };
   
-   addElevatorTask = (elevatorNum, floorNum, timeToWait) => {
-    let tasks = [...this.state.elevatorTasks];
-    let waitingTimes = [...this.state.waitingTimes];
-    waitingTimes[floorNum] = timeToWait;
-    if(!Array.isArray(tasks[elevatorNum])){
-        tasks[elevatorNum] = [];
-    }
-    let reservations = [...this.state.awaitingReservations];
-    reservations.push(floorNum);
-    tasks[elevatorNum].push(floorNum);
-    this.setState({
-      elevatorTasks: tasks, 
-      awaitingReservations: reservations, 
-      waitingTimes
-    });
-  };
-  
-   setFloorWaitingTime = (floorNum, timeToWait) => {
-    let wt = [...this.state.waitingTimes];
-    wt[floorNum] = timeToWait;
-    this.setState({waitingTimes: wt});
-  };
-  
-   removeElevatorTask = (elevatorNum, floorNum) => {
-    let etasks = [...this.state.elevatorTasks];
-    let etask = etasks[elevatorNum] || [];
-    etask = etask.filter(floor=> floor!=floorNum);
-    etasks[elevatorNum] = etask;
-    this.setState({
-      elevatorTasks: etasks
-    })
-  };
-  
-   changeElevatorCurrFloor = (elevatorNum, floorNum) => {
-    let elvCurrFloors = [...this.state.currFloors];
-    elvCurrFloors[elevatorNum] = floorNum;
-    this.setState({currFloor: elvCurrFloors});
-  };
-
   addTask = (floorNum)=>{
     let {elevators} = this.props.settings;
-    let {elevatorTasks, currFloors, awaitingReservations, elevatorDirections, stoppedElevators} = this.state;
+    let {elevatorTasks, currFloors, awaitingReservations, elevatorDirections, stoppedElevators} = this.props.data;
     if(!awaitingReservations.includes(floorNum)){ // add new floor reservation only if it doesn`t exist.
       let {elevator, timeToWait} = findElevator(floorNum, 
                                   elevatorTasks, 
@@ -108,20 +41,20 @@ class Home extends Component{
                                   elevators,
                                   stoppedElevators);
 
-      this.addElevatorTask(elevator, floorNum, timeToWait);
-      this.setFloorWaitingTime(floorNum, timeToWait);
+      this.props.addElevatorTask(elevator, floorNum, timeToWait);
+      this.props.setFloorWaitingTime(floorNum, timeToWait);
       let remainingTime = timeToWait;
       
-      let interval = setInterval(()=>{
-        remainingTime-=(500/1000);
-        if(remainingTime > 0){
-          this.setFloorWaitingTime(floorNum, remainingTime);
-        }else{
-          clearInterval(interval);
-          this.setFloorWaitingTime(floorNum, 0);
-        }
+      // let interval = setInterval(()=>{
+      //   remainingTime-=(500/1000);
+      //   if(remainingTime > 0){
+      //     this.props.setFloorWaitingTime(floorNum, remainingTime);
+      //   }else{
+      //     clearInterval(interval);
+      //     this.props.setFloorWaitingTime(floorNum, 0);
+      //   }
         
-      }, 500);
+      // }, 500);
       
     }
 
@@ -133,20 +66,21 @@ class Home extends Component{
 
   render(){
     let {floors, elevators} = this.props.settings;
-
+    let {data} = this.props;
     return (
       <div className="mainContainer center-align" >
         <Settings onSelectClick={this.onSettingsChanged}/>
         <Building numOfFloors={floors} 
           numOfElevators={elevators} 
           addReservation={this.addTask}
-          awaitingReservations={this.state.awaitingReservations}
-          currFloors={this.state.currFloors}
-          elevatorTasks={this.state.elevatorTasks}
-          onFloorArrival={this.markElevatorArrival}
-          waitingTimes={this.state.waitingTimes}
-          changeElevatorCurrFloor={this.changeElevatorCurrFloor}
-          stoppedElevators={this.state.stoppedElevators}/>
+          awaitingReservations={data.awaitingReservations}
+          currFloors={data.currFloors}
+          elevatorTasks={data.elevatorTasks}
+          onFloorArrival={this.props.markElevatorArrival}
+          waitingTimes={data.waitingTimes}
+          changeElevatorCurrFloor={this.props.changeElevatorCurrFloor}
+          stoppedElevators={data.stoppedElevators}
+          reduceFloorWaitingTime={this.props.reduceFloorWaitingTime}/>
       </div>
     );
   }
@@ -155,13 +89,15 @@ class Home extends Component{
 
 const mapDispatchToProps = (dispatch)=> {
   return bindActionCreators({
-    changeSettings
+    changeSettings,
+    ...buildingActions
   }, dispatch);
 }
 
 function mapStateToProps(state, ownProps) {
   return {  
-    settings: state.settings
+    settings: state.settings,
+    data: state.elevatorsManagement
   };
 }
 

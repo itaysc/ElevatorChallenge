@@ -9,7 +9,7 @@ import animate from '../../helpers/animate';
 
 const BRICK_HEIGHT = 110;
 const BRICK_BORDER = 7;
-
+let needToSetInterval = true;
 class Elavator extends Component{
 
     constructor(props){
@@ -27,7 +27,8 @@ class Elavator extends Component{
         elevatorNum: PropTypes.number,
         removeElevatorTask: PropTypes.func,
         changeElevatorCurrFloor: PropTypes.func,
-        waitingOnFloor: PropTypes.bool
+        waitingOnFloor: PropTypes.bool,
+        reduceFloorWaitingTime: PropTypes.func
     }
     
     static defaultProps = {
@@ -54,8 +55,8 @@ class Elavator extends Component{
             props = this.props;
         }
         if(props.tasks && props.tasks.length > 0){
-            let direction = (props.currFloor > props.tasks[0])? 1: -1;
-            let floorDiff = Math.abs((props.currFloor - props.tasks[0]));
+            let direction = (props.currFloor > props.tasks[0].floor)? 1: -1;
+            let floorDiff = Math.abs((props.currFloor - props.tasks[0].floor));
             let heightToTravel = ((floorDiff * direction * BRICK_HEIGHT)+(floorDiff * BRICK_BORDER));
             return {
                 distance: heightToTravel,
@@ -72,7 +73,13 @@ class Elavator extends Component{
             };
         }
     }
+//  shouldComponentUpdate(nextProps, nextState){
+//     if(nextProps.tasks != this.props.tasks && nextProps.tasks.length > 0){
+//         needToSetInterval = true;
+//     }
 
+//     return nextProps !== this.props || nextState !== this.state;
+//  }
     componentWillReceiveProps(nextProps){
         if(nextProps.tasks.length > 0){
             this.setState({isMoving: true})
@@ -92,22 +99,32 @@ class Elavator extends Component{
 
                 update={({y}) => {
                         let hasTasks = this.props.tasks.length>0; 
-                        let floor = this.props.tasks[0];
                         let elem = document.getElementById(`elevator${this.props.elevatorNum}`)
-                        let {distance, duration, floorDiff, direction} = this.getDistanceBetweenFloors() ;
-                        if(hasTasks && !this.props.waitingOnFloor){
+                        let {distance, duration, floorDiff, direction} = this.getDistanceBetweenFloors();
+                        if(hasTasks && !this.props.waitingOnFloor && this.props.tasks[0].started){
                             let x = 0; 
                             let currFloor = this.props.currFloor;
                             let props = this.props;
                             // follow the elevator with its route- mark each floor.
-                            var intervalID = setInterval(function () {
-                                if (++x === floorDiff) {
+                            let floor = this.props.tasks[0].floor;
+                            if(needToSetInterval){
+                                needToSetInterval = false;
+                                var intervalID = setInterval(increamentFloor, 500);
+                            }
+                           
+                            function increamentFloor(){
+                                x++;
+                                if (x === floorDiff) {
+                                    x = 0;
+                                    needToSetInterval=true;
+                                    clearInterval(intervalID);
                                     props.onFloorArrival(props.elevatorNum, floor);// mark arrival
-                                    window.clearInterval(intervalID);
+                                    //props.reduceFloorWaitingTime(floor);
+                                }else{
+                                    props.reduceFloorWaitingTime(floor);
+                                    props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor));
                                 }
-
-                                props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor));
-                            }, 500);
+                            }
                         }
                         //let defaultY = direction * this.props.currFloor * (BRICK_HEIGHT+BRICK_BORDER);
                         return({

@@ -6,10 +6,10 @@ export default function(awaitingFloor, elevatorTasks, currFloors, elevatorDirect
         let currElvFloor = currFloors[i] || 0;
         if(elevatorTasks[i] && elevatorTasks[i].length > 0){
             let timeToTake = 0;
-            elevatorTasks[i].map(floor=>{
-                timeToTake += (Math.abs(floor - currElvFloor) * 500);
+            elevatorTasks[i].map(entry=>{
+                timeToTake += (Math.abs(entry.floor - currElvFloor) * 500);
                 timeToTake+= 2000; // stops for 2 seconds in each floor
-                currElvFloor = floor;
+                currElvFloor = entry.floor;
             });
             if(timeToTake < minTimeToWaitInMills){
                 selectedElevator = i;

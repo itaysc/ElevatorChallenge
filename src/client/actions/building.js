@@ -19,6 +19,10 @@ export const setFloorWaitingTime = (floorNum, timeToWait) => {
   return {type: types.SET_FLOOR_WAITING_TIME, payload: {floorNum, timeToWait}};
 };
 
+export const reduceFloorWaitingTime = (floorNum) => {
+  return {type: types.REDUCE_FLOOR_WAITING_TIME, payload: floorNum };
+};
+
 export const removeElevatorTask = (elevatorNum, floorNum) => {
   return {type: types.REMOVE_ELEVATOR_TASK, payload: {elevatorNum, floorNum}};
 };

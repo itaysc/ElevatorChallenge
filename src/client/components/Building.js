@@ -20,7 +20,8 @@ const Building = (props)=>{
                         tasks={props.elevatorTasks[i]}
                         onFloorArrival={props.onFloorArrival}
                         changeElevatorCurrFloor={props.changeElevatorCurrFloor}
-                        waitingOnFloor={waitingOnFloor}/>
+                        waitingOnFloor={waitingOnFloor}
+                        reduceFloorWaitingTime={props.reduceFloorWaitingTime}/>
                 );
         }
 
@@ -79,7 +80,8 @@ Building.propTypes = {
     onFloorArrival: PropTypes.func,
     waitingTimes: PropTypes.array,
     changeElevatorCurrFloor: PropTypes.func,
-    stoppedElevators: PropTypes.arrayOf(PropTypes.number)
+    stoppedElevators: PropTypes.arrayOf(PropTypes.number),
+    reduceFloorWaitingTime: PropTypes.func
 }
 
 
