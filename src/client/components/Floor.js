@@ -15,13 +15,13 @@ const Floor = (props)=>{
                      {props.floorNum}
                 </button>
             </div>
-            <span style={{width: '50px'}}>
+            {/* <span style={{width: '50px'}}>
                 {
-                    props.secondsRemaining && props.secondsRemaining != 0? 
-                    <div className="waitingTime">{props.secondsRemaining}</div>:
-                    <div className="waitingTime">0</div>
+                    // props.secondsRemaining && props.secondsRemaining != 0? 
+                    // <div className="waitingTime">{props.secondsRemaining}</div>:
+                    // <div className="waitingTime">0</div>
                 }
-            </span>
+            </span> */}
 
         </div>
     )

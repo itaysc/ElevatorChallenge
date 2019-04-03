@@ -121,7 +121,7 @@ class Elavator extends Component{
                                     props.onFloorArrival(props.elevatorNum, floor);// mark arrival
                                     //props.reduceFloorWaitingTime(floor);
                                 }else{
-                                    props.reduceFloorWaitingTime(floor);
+                                    //props.reduceFloorWaitingTime(floor);
                                     props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor), floor);
                                 }
                             }

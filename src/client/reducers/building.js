@@ -60,14 +60,9 @@ export default function(state = initialState, action) {
             audio.load();
             audio.play();
         }
-        // currElvRemainingFloors = currElvRemainingFloors.filter(entry=> entry.floor!=action.payload.floorNum);
-        // if(currElvRemainingFloors.length > 0){
-        //     currElvRemainingFloors[0].started = true;
-        // }
-        // remainingTasks[action.payload.elevatorNum] = currElvRemainingFloors;
+
         return {...state, 
                 currFloors, awaitingReservations:remainingFloors,
-                waitingTimes: waitingTimes2,
                 stoppedElevators};
 
     case types.ADD_ELEVATOR_TASK:
@@ -84,35 +79,35 @@ export default function(state = initialState, action) {
         let reservations = [...state.awaitingReservations];
         reservations.push(action.payload.floorNum);
         tasks[action.payload.elevatorNum].push({started: isStarted, floor: action.payload.floorNum});
-        return {...state, elevatorTasks: tasks, awaitingReservations: reservations, waitingTimes};
+        return {...state, elevatorTasks: tasks, awaitingReservations: reservations};
 
-    case types.REDUCE_FLOOR_WAITING_TIME:
-        let wtimes = [...state.waitingTimes];
-        wtimes[action.payload] = wtimes[action.payload] - 0.5;
-        return {...state, waitingTimes: wtimes }
+    // case types.REDUCE_FLOOR_WAITING_TIME:
+    //     let wtimes = [...state.waitingTimes];
+    //     wtimes[action.payload] = wtimes[action.payload] - 0.5;
+    //     return {...state, waitingTimes: wtimes }
 
-    case types.SET_FLOOR_WAITING_TIME:
-        let wt = [...state.waitingTimes];
-        wt[action.payload.floorNum] = action.payload.timeToWait;
-        return {...state, waitingTimes: wt }
+    // case types.SET_FLOOR_WAITING_TIME:
+    //     let wt = [...state.waitingTimes];
+    //     wt[action.payload.floorNum] = action.payload.timeToWait;
+    //     return {...state, waitingTimes: wt }
 
-    case types.REDUCE_ALL_FLOORS_WAITING_TIME:
-            let remainingTasks3 = [];
-            // [[{started, floorNum}, {started, floorNum}], [{started, floorNum}, {started, floorNum}]]
-            state.elevatorTasks.map((t, elevatorNum)=>{
-                if(t && t.length > 0){
-                    t.map(job=>{
-                        if(job.floor != action.payload){
-                            remainingTasks3.push(job.floor);
-                        }
-                    })
-                }
-            });
-            let waitT = [...state.waitingTimes];
-            remainingTasks3.map(index=>{
-                waitT[index] = waitT[index] - 0.5;
-            })
-            return {...state, waitingTimes: waitT }
+    // case types.REDUCE_ALL_FLOORS_WAITING_TIME:
+    //         let remainingTasks3 = [];
+    //         // [[{started, floorNum}, {started, floorNum}], [{started, floorNum}, {started, floorNum}]]
+    //         state.elevatorTasks.map((t, elevatorNum)=>{
+    //             if(t && t.length > 0){
+    //                 t.map(job=>{
+    //                     if(job.floor != action.payload){
+    //                         remainingTasks3.push(job.floor);
+    //                     }
+    //                 })
+    //             }
+    //         });
+    //         let waitT = [...state.waitingTimes];
+    //         remainingTasks3.map(index=>{
+    //             waitT[index] = waitT[index] - 0.5;
+    //         })
+    //         return {...state, waitingTimes: waitT }
 
     default:
       return state;
