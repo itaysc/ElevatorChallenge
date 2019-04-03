@@ -10,6 +10,8 @@ import Floor from '../components/Floor';
 import BuildingFloors from '../components/BuildingFloors';
 import findElevator from '../../helpers/findElevator';
 
+export const MainContext = React.createContext();
+
 class Home extends Component{
   constructor(props){
     super(props);
@@ -67,21 +69,26 @@ class Home extends Component{
   render(){
     let {floors, elevators} = this.props.settings;
     let {data} = this.props;
+    let contextVal = {
+      numOfFloors: floors,
+      numOfElevators: elevators,
+      addReservation: this.addTask,
+      awaitingReservations: data.awaitingReservations,
+      currFloors: data.currFloors,
+      elevatorTasks: data.elevatorTasks,
+      onFloorArrival: this.props.markElevatorArrival,
+      waitingTimes: data.waitingTimes,
+      changeElevatorCurrFloor: this.props.changeElevatorCurrFloor,
+      stoppedElevators: data.stoppedElevators,
+      reduceFloorWaitingTime: this.props.reduceFloorWaitingTime
+    }
     return (
-      <div className="mainContainer center-align" >
-        <Settings onSelectClick={this.onSettingsChanged}/>
-        <Building numOfFloors={floors} 
-          numOfElevators={elevators} 
-          addReservation={this.addTask}
-          awaitingReservations={data.awaitingReservations}
-          currFloors={data.currFloors}
-          elevatorTasks={data.elevatorTasks}
-          onFloorArrival={this.props.markElevatorArrival}
-          waitingTimes={data.waitingTimes}
-          changeElevatorCurrFloor={this.props.changeElevatorCurrFloor}
-          stoppedElevators={data.stoppedElevators}
-          reduceFloorWaitingTime={this.props.reduceFloorWaitingTime}/>
-      </div>
+      <MainContext.Provider value={contextVal}>
+        <div className="mainContainer center-align" >
+          <Settings onSelectClick={this.onSettingsChanged}/>
+          <Building />
+        </div>
+      </MainContext.Provider>
     );
   }
 

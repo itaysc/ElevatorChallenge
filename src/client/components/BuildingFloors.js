@@ -13,8 +13,7 @@ const BuildingFloors = (props)=>{
 }
 
 BuildingFloors.propTypes = {
-    renderFloors: PropTypes.func.isRequired,
-    numOfFloors: PropTypes.number.isRequired
+    renderFloors: PropTypes.func.isRequired
 }
 
 export default BuildingFloors;

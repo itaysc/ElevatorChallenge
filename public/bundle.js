@@ -5771,8 +5771,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _react = __webpack_require__(0);
 
 var _react2 = _interopRequireDefault(_react);
@@ -5787,199 +5785,19 @@ var _elv2 = _interopRequireDefault(_elv);
 
 var _reactMove = __webpack_require__(596);
 
-var _d3Ease = __webpack_require__(608);
-
-var _directions = __webpack_require__(619);
-
-var _directions2 = _interopRequireDefault(_directions);
-
-var _animate = __webpack_require__(620);
-
-var _animate2 = _interopRequireDefault(_animate);
+var _Main = __webpack_require__(592);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-//import Bell from './Bell';
 
 var BRICK_HEIGHT = 110;
 var BRICK_BORDER = 7;
 var needToSetInterval = true;
 
-var Elavator = function (_Component) {
-    _inherits(Elavator, _Component);
+var Elevator = function Elevator(props) {
 
-    function Elavator(props) {
-        _classCallCheck(this, Elavator);
+    var context = (0, _react.useContext)(_Main.MainContext);
 
-        var _this = _possibleConstructorReturn(this, (Elavator.__proto__ || Object.getPrototypeOf(Elavator)).call(this, props));
-
-        _initialiseProps.call(_this);
-
-        _this.state = {
-            isMoving: false
-        };
-        return _this;
-    }
-    // componentWillReceiveProps(nextProps){
-    //     if((nextProps.tasks.length === 1 && !nextProps.waitingOnFloor) ||
-    //         (!nextProps.waitingOnFloor && this.props.waitingOnFloor && nextProps.tasks.length > 0)){
-    //         let elv = document.getElementById(`elevator${this.props.elevatorNum}`);
-    //         if(elv){
-    //             let {distance, duration, floorDiff, direction} = this.getDistanceBetweenFloors(nextProps);
-    //             let travel = direction * distance;
-    //             animate(elv, duration, elv.style.top, elv.style.top + travel);
-    //         }
-    //     }
-    // }
-
-
-    _createClass(Elavator, [{
-        key: 'componentWillReceiveProps',
-
-        //  shouldComponentUpdate(nextProps, nextState){
-        //     if(nextProps.tasks != this.props.tasks && nextProps.tasks.length > 0){
-        //         needToSetInterval = true;
-        //     }
-
-        //     return nextProps !== this.props || nextState !== this.state;
-        //  }
-        value: function componentWillReceiveProps(nextProps) {
-            if (nextProps.tasks.length > 0) {
-                this.setState({ isMoving: true });
-            } else {
-                this.setState({ isMoving: false });
-            }
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            var _this2 = this;
-
-            var _state = this.state,
-                y = _state.y,
-                duration = _state.duration;
-
-            return _react2.default.createElement(
-                _react.Fragment,
-                null,
-                _react2.default.createElement(
-                    _reactMove.Animate,
-                    {
-                        start: function start() {
-                            return {
-                                y: 0
-                            };
-                        },
-
-                        update: function update(_ref) {
-                            var y = _ref.y;
-
-                            var hasTasks = _this2.props.tasks.length > 0;
-                            var elem = document.getElementById('elevator' + _this2.props.elevatorNum);
-
-                            var _getDistanceBetweenFl = _this2.getDistanceBetweenFloors(),
-                                distance = _getDistanceBetweenFl.distance,
-                                duration = _getDistanceBetweenFl.duration,
-                                floorDiff = _getDistanceBetweenFl.floorDiff,
-                                direction = _getDistanceBetweenFl.direction;
-
-                            if (hasTasks && !_this2.props.waitingOnFloor && _this2.props.tasks[0].started) {
-                                var _increamentFloor = function _increamentFloor() {
-                                    x++;
-                                    if (x === floorDiff) {
-                                        x = 0;
-                                        needToSetInterval = true;
-                                        clearInterval(intervalID);
-                                        props.onFloorArrival(props.elevatorNum, floor); // mark arrival
-                                        //props.reduceFloorWaitingTime(floor);
-                                    } else {
-                                        //props.reduceFloorWaitingTime(floor);
-                                        props.changeElevatorCurrFloor(props.elevatorNum, x + currFloor, floor);
-                                    }
-                                };
-
-                                var x = 0;
-                                var currFloor = _this2.props.currFloor;
-                                var props = _this2.props;
-                                // follow the elevator with its route- mark each floor.
-                                var floor = _this2.props.tasks[0].floor;
-                                if (needToSetInterval) {
-                                    needToSetInterval = false;
-                                    var intervalID = setInterval(_increamentFloor, 500);
-                                }
-                            }
-                            //let defaultY = direction * this.props.currFloor * (BRICK_HEIGHT+BRICK_BORDER);
-                            return {
-                                y: [hasTasks && !_this2.props.waitingOnFloor ? distance : 0 /*elem.style.top*/],
-                                timing: { duration: duration /*, ease: easeExpOut*/ }
-                            };
-                        }
-                    },
-                    function (state) {
-                        var y = state.y;
-
-                        var yPos = _this2.props.currFloor * -103 + 'px';
-                        if (_this2.props.currFloor > 0 && !_this2.state.isMoving) {
-                            y = 0;
-                        }
-                        return _react2.default.createElement(
-                            'div',
-                            {
-                                id: 'elevator' + _this2.props.elevatorNum,
-                                className: 'translationDiv', style: {
-                                    WebkitTransform: 'translate3d(0, ' + y + 'px, 0)',
-                                    transform: 'translate3d(0, ' + y + 'px, 0)',
-                                    top: yPos,
-                                    position: 'relative'
-                                } },
-                            _react2.default.createElement('img', { className: 'elvPng', src: _elv2.default })
-                        );
-                    }
-                ),
-                _react2.default.createElement(
-                    'audio',
-                    { id: 'dingSound' + this.props.elevatorNum },
-                    _react2.default.createElement('source', { src: __webpack_require__(621), type: 'audio/mpeg' })
-                )
-            );
-        }
-    }]);
-
-    return Elavator;
-}(_react.Component);
-
-Elavator.propTypes = {
-    tasks: _propTypes2.default.array,
-    direction: _propTypes2.default.number, // 0 = down, 1 = up
-    currFloor: _propTypes2.default.number,
-    onFloorArrival: _propTypes2.default.func,
-    elevatorNum: _propTypes2.default.number,
-    removeElevatorTask: _propTypes2.default.func,
-    changeElevatorCurrFloor: _propTypes2.default.func,
-    waitingOnFloor: _propTypes2.default.bool,
-    reduceFloorWaitingTime: _propTypes2.default.func
-};
-Elavator.defaultProps = {
-    tasks: [],
-    currFloor: 0,
-    direction: _directions2.default.UP,
-    waitingOnFloor: false };
-
-var _initialiseProps = function _initialiseProps() {
-    var _this3 = this;
-
-    this.getDistanceBetweenFloors = function () {
-        var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-
-        if (props == null) {
-            props = _this3.props;
-        }
+    function getDistanceBetweenFloors() {
         if (props.tasks && props.tasks.length > 0) {
             var direction = props.currFloor > props.tasks[0].floor ? 1 : -1;
             var floorDiff = Math.abs(props.currFloor - props.tasks[0].floor);
@@ -5998,10 +5816,97 @@ var _initialiseProps = function _initialiseProps() {
                 direction: 1
             };
         }
-    };
+    }
+
+    return _react2.default.createElement(
+        _react.Fragment,
+        null,
+        _react2.default.createElement(
+            _reactMove.Animate,
+            {
+                start: function start() {
+                    return {
+                        y: 0
+                    };
+                },
+
+                update: function update(_ref) {
+                    var y = _ref.y;
+
+                    var hasTasks = props.tasks && props.tasks.length > 0;
+                    var elem = document.getElementById('elevator' + props.elevatorNum);
+
+                    var _getDistanceBetweenFl = getDistanceBetweenFloors(),
+                        distance = _getDistanceBetweenFl.distance,
+                        duration = _getDistanceBetweenFl.duration,
+                        floorDiff = _getDistanceBetweenFl.floorDiff,
+                        direction = _getDistanceBetweenFl.direction;
+
+                    if (hasTasks && !props.waitingOnFloor && props.tasks[0].started) {
+                        var increamentFloor = function increamentFloor() {
+                            x++;
+                            if (x === floorDiff) {
+                                x = 0;
+                                needToSetInterval = true;
+                                clearInterval(intervalID);
+                                context.onFloorArrival(props.elevatorNum, floor); // mark arrival
+                                //context.reduceFloorWaitingTime(floor);
+                            } else {
+                                //context.reduceFloorWaitingTime(floor);
+                                context.changeElevatorCurrFloor(props.elevatorNum, x + currFloor, floor);
+                            }
+                        };
+
+                        var x = 0;
+                        var currFloor = props.currFloor;
+                        // follow the elevator with its route- mark each floor.
+                        var floor = props.tasks[0].floor;
+                        if (needToSetInterval) {
+                            needToSetInterval = false;
+                            var intervalID = setInterval(increamentFloor, 500);
+                        }
+                    }
+                    return {
+                        y: [hasTasks && !props.waitingOnFloor ? distance : 0 /*elem.style.top*/],
+                        timing: { duration: duration /*, ease: easeExpOut*/ }
+                    };
+                }
+            },
+            function (state) {
+                var y = state.y;
+
+                var yPos = props.currFloor * -103 + 'px';
+
+                return _react2.default.createElement(
+                    'div',
+                    {
+                        id: 'elevator' + props.elevatorNum,
+                        className: 'translationDiv', style: {
+                            WebkitTransform: 'translate3d(0, ' + y + 'px, 0)',
+                            transform: 'translate3d(0, ' + y + 'px, 0)',
+                            top: yPos,
+                            position: 'relative'
+                        } },
+                    _react2.default.createElement('img', { className: 'elvPng', src: _elv2.default })
+                );
+            }
+        ),
+        _react2.default.createElement(
+            'audio',
+            { id: 'dingSound' + props.elevatorNum },
+            _react2.default.createElement('source', { src: __webpack_require__(621), type: 'audio/mpeg' })
+        )
+    );
 };
 
-exports.default = Elavator;
+Elevator.propTypes = {
+    tasks: _propTypes2.default.array,
+    currFloor: _propTypes2.default.number,
+    elevatorNum: _propTypes2.default.number,
+    waitingOnFloor: _propTypes2.default.bool
+};
+
+exports.default = Elevator;
 
 /***/ }),
 /* 142 */
@@ -11351,8 +11256,7 @@ var BuildingFloors = function BuildingFloors(props) {
 };
 
 BuildingFloors.propTypes = {
-    renderFloors: _propTypes2.default.func.isRequired,
-    numOfFloors: _propTypes2.default.number.isRequired
+    renderFloors: _propTypes2.default.func.isRequired
 };
 
 exports.default = BuildingFloors;
@@ -52154,6 +52058,7 @@ exports.default = {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.MainContext = undefined;
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -52206,6 +52111,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var MainContext = exports.MainContext = _react2.default.createContext();
 
 var Home = function (_Component) {
   _inherits(Home, _Component);
@@ -52275,21 +52182,28 @@ var Home = function (_Component) {
           elevators = _props$settings.elevators;
       var data = this.props.data;
 
+      var contextVal = {
+        numOfFloors: floors,
+        numOfElevators: elevators,
+        addReservation: this.addTask,
+        awaitingReservations: data.awaitingReservations,
+        currFloors: data.currFloors,
+        elevatorTasks: data.elevatorTasks,
+        onFloorArrival: this.props.markElevatorArrival,
+        waitingTimes: data.waitingTimes,
+        changeElevatorCurrFloor: this.props.changeElevatorCurrFloor,
+        stoppedElevators: data.stoppedElevators,
+        reduceFloorWaitingTime: this.props.reduceFloorWaitingTime
+      };
       return _react2.default.createElement(
-        'div',
-        { className: 'mainContainer center-align' },
-        _react2.default.createElement(_Settings2.default, { onSelectClick: this.onSettingsChanged }),
-        _react2.default.createElement(_Building2.default, { numOfFloors: floors,
-          numOfElevators: elevators,
-          addReservation: this.addTask,
-          awaitingReservations: data.awaitingReservations,
-          currFloors: data.currFloors,
-          elevatorTasks: data.elevatorTasks,
-          onFloorArrival: this.props.markElevatorArrival,
-          waitingTimes: data.waitingTimes,
-          changeElevatorCurrFloor: this.props.changeElevatorCurrFloor,
-          stoppedElevators: data.stoppedElevators,
-          reduceFloorWaitingTime: this.props.reduceFloorWaitingTime })
+        MainContext.Provider,
+        { value: contextVal },
+        _react2.default.createElement(
+          'div',
+          { className: 'mainContainer center-align' },
+          _react2.default.createElement(_Settings2.default, { onSelectClick: this.onSettingsChanged }),
+          _react2.default.createElement(_Building2.default, null)
+        )
       );
     }
   }]);
@@ -53146,429 +53060,19 @@ var UPDATE = 'UPDATE';
 var LEAVE = 'LEAVE';
 
 /***/ }),
-/* 608 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__linear__ = __webpack_require__(609);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeLinear", function() { return __WEBPACK_IMPORTED_MODULE_0__linear__["a"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__quad__ = __webpack_require__(610);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeQuad", function() { return __WEBPACK_IMPORTED_MODULE_1__quad__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeQuadIn", function() { return __WEBPACK_IMPORTED_MODULE_1__quad__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeQuadOut", function() { return __WEBPACK_IMPORTED_MODULE_1__quad__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeQuadInOut", function() { return __WEBPACK_IMPORTED_MODULE_1__quad__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__cubic__ = __webpack_require__(611);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCubic", function() { return __WEBPACK_IMPORTED_MODULE_2__cubic__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCubicIn", function() { return __WEBPACK_IMPORTED_MODULE_2__cubic__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCubicOut", function() { return __WEBPACK_IMPORTED_MODULE_2__cubic__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCubicInOut", function() { return __WEBPACK_IMPORTED_MODULE_2__cubic__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__poly__ = __webpack_require__(612);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easePoly", function() { return __WEBPACK_IMPORTED_MODULE_3__poly__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easePolyIn", function() { return __WEBPACK_IMPORTED_MODULE_3__poly__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easePolyOut", function() { return __WEBPACK_IMPORTED_MODULE_3__poly__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easePolyInOut", function() { return __WEBPACK_IMPORTED_MODULE_3__poly__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__sin__ = __webpack_require__(613);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeSin", function() { return __WEBPACK_IMPORTED_MODULE_4__sin__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeSinIn", function() { return __WEBPACK_IMPORTED_MODULE_4__sin__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeSinOut", function() { return __WEBPACK_IMPORTED_MODULE_4__sin__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeSinInOut", function() { return __WEBPACK_IMPORTED_MODULE_4__sin__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__exp__ = __webpack_require__(614);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeExp", function() { return __WEBPACK_IMPORTED_MODULE_5__exp__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeExpIn", function() { return __WEBPACK_IMPORTED_MODULE_5__exp__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeExpOut", function() { return __WEBPACK_IMPORTED_MODULE_5__exp__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeExpInOut", function() { return __WEBPACK_IMPORTED_MODULE_5__exp__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__circle__ = __webpack_require__(615);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCircle", function() { return __WEBPACK_IMPORTED_MODULE_6__circle__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCircleIn", function() { return __WEBPACK_IMPORTED_MODULE_6__circle__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCircleOut", function() { return __WEBPACK_IMPORTED_MODULE_6__circle__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeCircleInOut", function() { return __WEBPACK_IMPORTED_MODULE_6__circle__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__bounce__ = __webpack_require__(616);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBounce", function() { return __WEBPACK_IMPORTED_MODULE_7__bounce__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBounceIn", function() { return __WEBPACK_IMPORTED_MODULE_7__bounce__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBounceOut", function() { return __WEBPACK_IMPORTED_MODULE_7__bounce__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBounceInOut", function() { return __WEBPACK_IMPORTED_MODULE_7__bounce__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__back__ = __webpack_require__(617);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBack", function() { return __WEBPACK_IMPORTED_MODULE_8__back__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBackIn", function() { return __WEBPACK_IMPORTED_MODULE_8__back__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBackOut", function() { return __WEBPACK_IMPORTED_MODULE_8__back__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeBackInOut", function() { return __WEBPACK_IMPORTED_MODULE_8__back__["b"]; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__elastic__ = __webpack_require__(618);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeElastic", function() { return __WEBPACK_IMPORTED_MODULE_9__elastic__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeElasticIn", function() { return __WEBPACK_IMPORTED_MODULE_9__elastic__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeElasticOut", function() { return __WEBPACK_IMPORTED_MODULE_9__elastic__["c"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "easeElasticInOut", function() { return __WEBPACK_IMPORTED_MODULE_9__elastic__["b"]; });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/***/ }),
-/* 609 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = linear;
-function linear(t) {
-  return +t;
-}
-
-
-/***/ }),
-/* 610 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = quadIn;
-/* harmony export (immutable) */ __webpack_exports__["c"] = quadOut;
-/* harmony export (immutable) */ __webpack_exports__["b"] = quadInOut;
-function quadIn(t) {
-  return t * t;
-}
-
-function quadOut(t) {
-  return t * (2 - t);
-}
-
-function quadInOut(t) {
-  return ((t *= 2) <= 1 ? t * t : --t * (2 - t) + 1) / 2;
-}
-
-
-/***/ }),
-/* 611 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = cubicIn;
-/* harmony export (immutable) */ __webpack_exports__["c"] = cubicOut;
-/* harmony export (immutable) */ __webpack_exports__["b"] = cubicInOut;
-function cubicIn(t) {
-  return t * t * t;
-}
-
-function cubicOut(t) {
-  return --t * t * t + 1;
-}
-
-function cubicInOut(t) {
-  return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
-}
-
-
-/***/ }),
-/* 612 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return polyIn; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return polyOut; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return polyInOut; });
-var exponent = 3;
-
-var polyIn = (function custom(e) {
-  e = +e;
-
-  function polyIn(t) {
-    return Math.pow(t, e);
-  }
-
-  polyIn.exponent = custom;
-
-  return polyIn;
-})(exponent);
-
-var polyOut = (function custom(e) {
-  e = +e;
-
-  function polyOut(t) {
-    return 1 - Math.pow(1 - t, e);
-  }
-
-  polyOut.exponent = custom;
-
-  return polyOut;
-})(exponent);
-
-var polyInOut = (function custom(e) {
-  e = +e;
-
-  function polyInOut(t) {
-    return ((t *= 2) <= 1 ? Math.pow(t, e) : 2 - Math.pow(2 - t, e)) / 2;
-  }
-
-  polyInOut.exponent = custom;
-
-  return polyInOut;
-})(exponent);
-
-
-/***/ }),
-/* 613 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = sinIn;
-/* harmony export (immutable) */ __webpack_exports__["c"] = sinOut;
-/* harmony export (immutable) */ __webpack_exports__["b"] = sinInOut;
-var pi = Math.PI,
-    halfPi = pi / 2;
-
-function sinIn(t) {
-  return 1 - Math.cos(t * halfPi);
-}
-
-function sinOut(t) {
-  return Math.sin(t * halfPi);
-}
-
-function sinInOut(t) {
-  return (1 - Math.cos(pi * t)) / 2;
-}
-
-
-/***/ }),
-/* 614 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = expIn;
-/* harmony export (immutable) */ __webpack_exports__["c"] = expOut;
-/* harmony export (immutable) */ __webpack_exports__["b"] = expInOut;
-function expIn(t) {
-  return Math.pow(2, 10 * t - 10);
-}
-
-function expOut(t) {
-  return 1 - Math.pow(2, -10 * t);
-}
-
-function expInOut(t) {
-  return ((t *= 2) <= 1 ? Math.pow(2, 10 * t - 10) : 2 - Math.pow(2, 10 - 10 * t)) / 2;
-}
-
-
-/***/ }),
-/* 615 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = circleIn;
-/* harmony export (immutable) */ __webpack_exports__["c"] = circleOut;
-/* harmony export (immutable) */ __webpack_exports__["b"] = circleInOut;
-function circleIn(t) {
-  return 1 - Math.sqrt(1 - t * t);
-}
-
-function circleOut(t) {
-  return Math.sqrt(1 - --t * t);
-}
-
-function circleInOut(t) {
-  return ((t *= 2) <= 1 ? 1 - Math.sqrt(1 - t * t) : Math.sqrt(1 - (t -= 2) * t) + 1) / 2;
-}
-
-
-/***/ }),
-/* 616 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = bounceIn;
-/* harmony export (immutable) */ __webpack_exports__["c"] = bounceOut;
-/* harmony export (immutable) */ __webpack_exports__["b"] = bounceInOut;
-var b1 = 4 / 11,
-    b2 = 6 / 11,
-    b3 = 8 / 11,
-    b4 = 3 / 4,
-    b5 = 9 / 11,
-    b6 = 10 / 11,
-    b7 = 15 / 16,
-    b8 = 21 / 22,
-    b9 = 63 / 64,
-    b0 = 1 / b1 / b1;
-
-function bounceIn(t) {
-  return 1 - bounceOut(1 - t);
-}
-
-function bounceOut(t) {
-  return (t = +t) < b1 ? b0 * t * t : t < b3 ? b0 * (t -= b2) * t + b4 : t < b6 ? b0 * (t -= b5) * t + b7 : b0 * (t -= b8) * t + b9;
-}
-
-function bounceInOut(t) {
-  return ((t *= 2) <= 1 ? 1 - bounceOut(1 - t) : bounceOut(t - 1) + 1) / 2;
-}
-
-
-/***/ }),
-/* 617 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return backIn; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return backOut; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return backInOut; });
-var overshoot = 1.70158;
-
-var backIn = (function custom(s) {
-  s = +s;
-
-  function backIn(t) {
-    return t * t * ((s + 1) * t - s);
-  }
-
-  backIn.overshoot = custom;
-
-  return backIn;
-})(overshoot);
-
-var backOut = (function custom(s) {
-  s = +s;
-
-  function backOut(t) {
-    return --t * t * ((s + 1) * t + s) + 1;
-  }
-
-  backOut.overshoot = custom;
-
-  return backOut;
-})(overshoot);
-
-var backInOut = (function custom(s) {
-  s = +s;
-
-  function backInOut(t) {
-    return ((t *= 2) < 1 ? t * t * ((s + 1) * t - s) : (t -= 2) * t * ((s + 1) * t + s) + 2) / 2;
-  }
-
-  backInOut.overshoot = custom;
-
-  return backInOut;
-})(overshoot);
-
-
-/***/ }),
-/* 618 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return elasticIn; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return elasticOut; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return elasticInOut; });
-var tau = 2 * Math.PI,
-    amplitude = 1,
-    period = 0.3;
-
-var elasticIn = (function custom(a, p) {
-  var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
-
-  function elasticIn(t) {
-    return a * Math.pow(2, 10 * --t) * Math.sin((s - t) / p);
-  }
-
-  elasticIn.amplitude = function(a) { return custom(a, p * tau); };
-  elasticIn.period = function(p) { return custom(a, p); };
-
-  return elasticIn;
-})(amplitude, period);
-
-var elasticOut = (function custom(a, p) {
-  var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
-
-  function elasticOut(t) {
-    return 1 - a * Math.pow(2, -10 * (t = +t)) * Math.sin((t + s) / p);
-  }
-
-  elasticOut.amplitude = function(a) { return custom(a, p * tau); };
-  elasticOut.period = function(p) { return custom(a, p); };
-
-  return elasticOut;
-})(amplitude, period);
-
-var elasticInOut = (function custom(a, p) {
-  var s = Math.asin(1 / (a = Math.max(1, a))) * (p /= tau);
-
-  function elasticInOut(t) {
-    return ((t = t * 2 - 1) < 0
-        ? a * Math.pow(2, 10 * t) * Math.sin((s - t) / p)
-        : 2 - a * Math.pow(2, -10 * t) * Math.sin((s + t) / p)) / 2;
-  }
-
-  elasticInOut.amplitude = function(a) { return custom(a, p * tau); };
-  elasticInOut.period = function(p) { return custom(a, p); };
-
-  return elasticInOut;
-})(amplitude, period);
-
-
-/***/ }),
-/* 619 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = {
-    UP: 1,
-    DOWN: 0
-};
-
-/***/ }),
-/* 620 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (element, durationMills, startY, endY) {
-  var direction = startY > endY ? -1 : 1;
-  var distance = Math.abs(startY - endY);
-  var numOfFloors = distance / (BRICK_HEIGHT + BRICK_BORDER);
-  var duration = numOfFloors * 500; // 500 mills per floor.
-  //let interval =   
-  var pos = startY;
-  var id = setInterval(frame, 10);
-  setTimeout(function () {
-    clearInterval(id);
-  }, duration);
-  function frame() {
-    if (pos == endY) {
-      clearInterval(id);
-    } else {
-      pos = direction > 0 ? pos + 1 : pos - 1;
-      element.style.top = pos + 'px';
-    }
-  }
-};
-
-var BRICK_HEIGHT = 110;
-var BRICK_BORDER = 7;
-
-/***/ }),
+/* 608 */,
+/* 609 */,
+/* 610 */,
+/* 611 */,
+/* 612 */,
+/* 613 */,
+/* 614 */,
+/* 615 */,
+/* 616 */,
+/* 617 */,
+/* 618 */,
+/* 619 */,
+/* 620 */,
 /* 621 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -53605,25 +53109,25 @@ var _Floor = __webpack_require__(143);
 
 var _Floor2 = _interopRequireDefault(_Floor);
 
+var _Main = __webpack_require__(592);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Building = function Building(props) {
 
-    //const [elevators, setElevators] = useState([]);
+    var context = (0, _react.useContext)(_Main.MainContext);
 
     function renderElevators() {
         var elevators = [];
-        for (var i = 0; i < props.numOfElevators; i++) {
-            var currFloor = props.currFloors.length > 0 && props.currFloors[i] ? props.currFloors[i] : 0;
-            var waitingOnFloor = props.stoppedElevators.includes(i);
+        for (var i = 0; i < context.numOfElevators; i++) {
+            var currFloor = context.currFloors.length > 0 && context.currFloors[i] ? context.currFloors[i] : 0;
+            var waitingOnFloor = context.stoppedElevators.includes(i);
             elevators.push(_react2.default.createElement(_Elevator2.default, { key: 'elevator' + i,
                 elevatorNum: i,
                 currFloor: currFloor,
-                tasks: props.elevatorTasks[i],
-                onFloorArrival: props.onFloorArrival,
-                changeElevatorCurrFloor: props.changeElevatorCurrFloor,
-                waitingOnFloor: waitingOnFloor,
-                reduceFloorWaitingTime: props.reduceFloorWaitingTime }));
+                tasks: context.elevatorTasks[i],
+                waitingOnFloor: waitingOnFloor
+            }));
         }
 
         return elevators;
@@ -53631,9 +53135,9 @@ var Building = function Building(props) {
 
     function renderFloors() {
         var floors = [];
-        for (var i = props.numOfFloors - 1; i >= 0; i--) {
-            var isAwaiting = props.awaitingReservations.includes(i);
-            var waitingTime = props.waitingTimes && props.waitingTimes[i] ? props.waitingTimes[i] : 0;
+        for (var i = context.numOfFloors - 1; i >= 0; i--) {
+            var isAwaiting = context.awaitingReservations.includes(i);
+            var waitingTime = context.waitingTimes && context.waitingTimes[i] ? context.waitingTimes[i] : 0;
             if (i === 0) {
                 // Initially set elevators at floor 0
                 floors.push(_react2.default.createElement(
@@ -53641,7 +53145,7 @@ var Building = function Building(props) {
                     { key: 'floor' + i, style: { display: 'flex' } },
                     _react2.default.createElement(_Floor2.default, { key: 'floor' + i,
                         floorNum: i,
-                        addReservation: props.addReservation,
+                        addReservation: context.addReservation,
                         isAwaiting: isAwaiting,
                         secondsRemaining: waitingTime }),
                     renderElevators()
@@ -53650,7 +53154,7 @@ var Building = function Building(props) {
 
                 floors.push(_react2.default.createElement(_Floor2.default, { key: 'floor' + i,
                     floorNum: i,
-                    addReservation: props.addReservation,
+                    addReservation: context.addReservation,
                     isAwaiting: isAwaiting,
                     secondsRemaining: waitingTime
                 }));
@@ -53663,26 +53167,8 @@ var Building = function Building(props) {
     return _react2.default.createElement(
         'div',
         { className: 'buildingContainer' },
-        _react2.default.createElement(_BuildingFloors2.default, {
-            numOfFloors: props.numOfFloors,
-            numOfElevators: props.numOfElevators,
-            renderFloors: renderFloors
-        })
+        _react2.default.createElement(_BuildingFloors2.default, { renderFloors: renderFloors })
     );
-};
-
-Building.propTypes = {
-    awaitingReservations: _propTypes2.default.arrayOf(_propTypes2.default.number),
-    addReservation: _propTypes2.default.func.isRequired,
-    numOfFloors: _propTypes2.default.number.isRequired,
-    numOfElevators: _propTypes2.default.number.isRequired,
-    currFloors: _propTypes2.default.arrayOf(_propTypes2.default.number),
-    elevatorTasks: _propTypes2.default.array,
-    onFloorArrival: _propTypes2.default.func,
-    waitingTimes: _propTypes2.default.array,
-    changeElevatorCurrFloor: _propTypes2.default.func,
-    stoppedElevators: _propTypes2.default.arrayOf(_propTypes2.default.number),
-    reduceFloorWaitingTime: _propTypes2.default.func
 };
 
 exports.default = Building;

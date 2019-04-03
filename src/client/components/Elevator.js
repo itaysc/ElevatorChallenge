@@ -1,59 +1,19 @@
-import React, {Fragment, Component, useState} from 'react';
+import React, {Fragment, useContext} from 'react';
 import PropTypes from 'prop-types';
 import elvImg from '../../assets/images/elv.png';
-import { Animate } from 'react-move'
-import { easeExpOut } from 'd3-ease'
-import directions from '../../helpers/directions';
-import animate from '../../helpers/animate';
-//import Bell from './Bell';
+import { Animate } from 'react-move';
+import {MainContext} from '../pages/Main';
 
 const BRICK_HEIGHT = 110;
 const BRICK_BORDER = 7;
 let needToSetInterval = true;
-class Elavator extends Component{
 
-    constructor(props){
-        super(props);
-        this.state={
-            isMoving: false
-        }
-    }
+const Elevator =  (props)=>{
 
-    static propTypes = {
-        tasks: PropTypes.array,
-        direction: PropTypes.number, // 0 = down, 1 = up
-        currFloor: PropTypes.number,
-        onFloorArrival: PropTypes.func,
-        elevatorNum: PropTypes.number,
-        removeElevatorTask: PropTypes.func,
-        changeElevatorCurrFloor: PropTypes.func,
-        waitingOnFloor: PropTypes.bool,
-        reduceFloorWaitingTime: PropTypes.func
-    }
-    
-    static defaultProps = {
-        tasks: [],
-        currFloor: 0,
-        direction: directions.UP,
-        waitingOnFloor: false
-    }
-    // componentWillReceiveProps(nextProps){
-    //     if((nextProps.tasks.length === 1 && !nextProps.waitingOnFloor) ||
-    //         (!nextProps.waitingOnFloor && this.props.waitingOnFloor && nextProps.tasks.length > 0)){
-    //         let elv = document.getElementById(`elevator${this.props.elevatorNum}`);
-    //         if(elv){
-    //             let {distance, duration, floorDiff, direction} = this.getDistanceBetweenFloors(nextProps);
-    //             let travel = direction * distance;
-    //             animate(elv, duration, elv.style.top, elv.style.top + travel);
-    //         }
-    //     }
-    // }
+    const context = useContext(MainContext);
 
 
-    getDistanceBetweenFloors = (props=null)=>{
-        if(props == null){
-            props = this.props;
-        }
+    function getDistanceBetweenFloors(){
         if(props.tasks && props.tasks.length > 0){
             let direction = (props.currFloor > props.tasks[0].floor)? 1: -1;
             let floorDiff = Math.abs((props.currFloor - props.tasks[0].floor));
@@ -73,100 +33,84 @@ class Elavator extends Component{
             };
         }
     }
-//  shouldComponentUpdate(nextProps, nextState){
-//     if(nextProps.tasks != this.props.tasks && nextProps.tasks.length > 0){
-//         needToSetInterval = true;
-//     }
 
-//     return nextProps !== this.props || nextState !== this.state;
-//  }
-    componentWillReceiveProps(nextProps){
-        if(nextProps.tasks.length > 0){
-            this.setState({isMoving: true})
-        }else{
-            this.setState({isMoving: false})
-        }
-    }
+    return (
+        <Fragment>
+            <Animate
+            start={() => ({
+                y: 0
+            })}
 
-    render(){
-        let {y, duration} = this.state;
-        return (
-            <Fragment>
-                <Animate
-                start={() => ({
-                    y: 0
-                })}
-
-                update={({y}) => {
-                        let hasTasks = this.props.tasks.length>0; 
-                        let elem = document.getElementById(`elevator${this.props.elevatorNum}`)
-                        let {distance, duration, floorDiff, direction} = this.getDistanceBetweenFloors();
-                        if(hasTasks && !this.props.waitingOnFloor && this.props.tasks[0].started){
-                            let x = 0; 
-                            let currFloor = this.props.currFloor;
-                            let props = this.props;
-                            // follow the elevator with its route- mark each floor.
-                            let floor = this.props.tasks[0].floor;
-                            if(needToSetInterval){
-                                needToSetInterval = false;
-                                var intervalID = setInterval(increamentFloor, 500);
-                            }
-                           
-                            function increamentFloor(){
-                                x++;
-                                if (x === floorDiff) {
-                                    x = 0;
-                                    needToSetInterval=true;
-                                    clearInterval(intervalID);
-                                    props.onFloorArrival(props.elevatorNum, floor);// mark arrival
-                                    //props.reduceFloorWaitingTime(floor);
-                                }else{
-                                    //props.reduceFloorWaitingTime(floor);
-                                    props.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor), floor);
-                                }
+            update={({y}) => {
+                    let hasTasks = props.tasks && props.tasks.length>0; 
+                    let elem = document.getElementById(`elevator${props.elevatorNum}`)
+                    let {distance, duration, floorDiff, direction} = getDistanceBetweenFloors();
+                    if(hasTasks && !props.waitingOnFloor && props.tasks[0].started){
+                        let x = 0; 
+                        let currFloor = props.currFloor;
+                        // follow the elevator with its route- mark each floor.
+                        let floor = props.tasks[0].floor;
+                        if(needToSetInterval){
+                            needToSetInterval = false;
+                            var intervalID = setInterval(increamentFloor, 500);
+                        }
+                       
+                        function increamentFloor(){
+                            x++;
+                            if (x === floorDiff) {
+                                x = 0;
+                                needToSetInterval=true;
+                                clearInterval(intervalID);
+                                context.onFloorArrival(props.elevatorNum, floor);// mark arrival
+                                //context.reduceFloorWaitingTime(floor);
+                            }else{
+                                //context.reduceFloorWaitingTime(floor);
+                                context.changeElevatorCurrFloor(props.elevatorNum, (x + currFloor), floor);
                             }
                         }
-                        //let defaultY = direction * this.props.currFloor * (BRICK_HEIGHT+BRICK_BORDER);
-                        return({
-                            y: [(hasTasks && !this.props.waitingOnFloor) ? distance : 0/*elem.style.top*/],
-                            timing: { duration:duration/*, ease: easeExpOut*/ },
-                        })
-                    
-                }}
-             >
-    
-                {
-                    (state)=>{
-                        let {y} = state;
-                        let yPos = `${this.props.currFloor * -103}px`;
-                        if(this.props.currFloor > 0 && !this.state.isMoving){
-                            y = 0;
-                        }
-                        return (
-                            <div
-                                id= {`elevator${this.props.elevatorNum}`}
-                                className='translationDiv' style={{
-                                WebkitTransform: `translate3d(0, ${y}px, 0)`,
-                                transform: `translate3d(0, ${y}px, 0)`,
-                                top: yPos,
-                                position:'relative'
-                            }}>
-                                <img className="elvPng" src ={elvImg}/>
-                            </div>
-                        )
                     }
-                }
-    
-            </Animate>
-            <audio id={`dingSound${this.props.elevatorNum}`}>
-                <source src={require('../../assets/mp3/ding.mp3')} type="audio/mpeg"/>
-            </audio>
-            </Fragment>
-            
-        )
-    }
+                    return({
+                        y: [(hasTasks && !props.waitingOnFloor) ? distance : 0/*elem.style.top*/],
+                        timing: { duration:duration/*, ease: easeExpOut*/ },
+                    })
+                
+            }}
+         >
 
+            {
+                (state)=>{
+                    let {y} = state;
+                    let yPos = `${props.currFloor * -103}px`;
+
+                    return (
+                        <div
+                            id= {`elevator${props.elevatorNum}`}
+                            className='translationDiv' style={{
+                            WebkitTransform: `translate3d(0, ${y}px, 0)`,
+                            transform: `translate3d(0, ${y}px, 0)`,
+                            top: yPos,
+                            position:'relative'
+                        }}>
+                            <img className="elvPng" src ={elvImg}/>
+                        </div>
+                    )
+                }
+            }
+
+        </Animate>
+        <audio id={`dingSound${props.elevatorNum}`}>
+            <source src={require('../../assets/mp3/ding.mp3')} type="audio/mpeg"/>
+        </audio>
+        </Fragment>
+        
+    )
 }
 
+Elevator.propTypes = {
+    tasks: PropTypes.array,
+    currFloor: PropTypes.number,
+    elevatorNum: PropTypes.number,
+    waitingOnFloor: PropTypes.bool
+}
 
-export default Elavator;
+export default Elevator;
