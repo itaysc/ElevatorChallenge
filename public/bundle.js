@@ -52158,19 +52158,7 @@ var Home = function (_Component) {
       _this.props.changeSettings(floors, elevators);
     };
 
-    _this.state = {
-
-      //associative array based on elevator numbers which describes the remaining floors for each elevators
-      elevatorTasks: [],
-      //associative array based on elevator numbers which describes the current floor of each elevator
-      currFloors: [],
-      //associative array based on elevator numbers which describes the current direction of each elevator
-      elevatorDirections: [],
-      //associative array based on floor numbers which describes the amount of time (seconds) until elevator arrival
-      waitingTimes: [],
-      //associative array based on elevators numbers which describes the elevators that are stopping for 2 seconds
-      stoppedElevators: []
-    };
+    _this.state = {};
     return _this;
   }
 
